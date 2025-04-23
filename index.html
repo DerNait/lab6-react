@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DerNait's Card Game</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<style>
+    .red {
+        color: red;
+    }
+</style>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        function Card({ message, color }) {
+            const [test, setTest] = React.useState(0);
+
+            const incrementar = () => {
+                setTest(test + 1);
+            }
+
+            const decrementar = () => {
+                setTest(test - 1);
+            }
+
+            const resetear = () => {
+                setTest(test - test);
+            }
+
+            return <div>
+                    <h1 className={color} >{message}</h1>
+                    <p>{test}</p>
+                    <button onClick={incrementar}>Sumar</button>
+                    <button onClick={decrementar}>Restar</button>
+                    <button onClick={resetear}>Resetear</button>
+                </div>  
+        }
+
+        function App(props) {
+            return <div>
+                    <Card message="CARD DE PRUEBA" color="red"/>
+                </div>
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />)
+    </script>
+</body>
+</html>
