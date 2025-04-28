@@ -5,27 +5,114 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 	<title>DerNait's Card Game</title>
 
-	<link
-		href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-		rel="stylesheet"
-	/>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+	<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
 
 	<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
 	<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 	<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
 	<style>
-		/* GRID */
-		.grid-container {
-			gap: 10px;
+		body {
+			position: relative;
+			margin: 0;
+			z-index: 0;
+		}
+		
+		body::before {
+			content: "";
+			position: fixed;
+			top: 0; left: 0;
+			width: 100%;
+			height: 100%;
+			background: 
+				linear-gradient(rgba(18, 21, 84, 0.4), rgba(0, 153, 255, 0.4)),
+				url('https://i.pinimg.com/originals/96/f0/fe/96f0fe2021e6eba13892e7c6540bbf78.jpg') center/cover no-repeat;
+			filter: grayscale(50%) brightness(0.5);
+			z-index: -1;
+		}
+		:root{ --primary:#54d8ff; }
+
+		.header{
+			height:120px;
+			background:linear-gradient(to bottom,#0a0a0a 50%,transparent);
+			display:flex;
+			flex-direction:column;
+			align-items:center;
+			justify-content:flex-start;
+			padding-top:1rem;
 		}
 
-		/* CARTA */   
+		.header h1{
+			margin:0;
+			font-family:"Orbitron", sans-serif;
+			font-size:3rem;
+			color:white;
+			text-shadow:0 0 8px rgba(84,216,255,.75);
+			letter-spacing:.05em;
+		}
+
+		.header p{
+			margin:.2rem 0 0;
+			font-family:"Orbitron", sans-serif;
+			font-size:1rem;
+			color:#ccefff;
+			opacity:.95;
+			padding:.2rem .8rem;
+			border:1px solid var(--primary);
+			border-radius:9999px;
+			background:rgba(84,216,255,.08);
+			backdrop-filter:blur(2px);
+		}
+
+
+		.table-container {
+			height: calc(100vh - 150px);
+			display: flex;
+			align-items: flex-start;
+			justify-content: center;
+			padding-top: 0.5rem;
+		}
+		.table-content{
+			display:flex;
+			align-items:center;
+			justify-content:center;
+			padding:2rem;
+			width:auto;
+			height:auto;
+			background:url("https://st4.depositphotos.com/13324256/22740/i/450/depositphotos_227401916-stock-photo-brown-textured-wooden-background-copy.jpg") center/cover no-repeat;
+			border-radius:1rem;
+			box-shadow:0 0 40px #00000080;
+		}
+
+		.grid-container {
+			gap: 20px;
+		}
+
 		.memory-card {
 			perspective: 1000px;
-			width: 100px;
-			height: 100px;
+			width: 9em;
+			height: 12em;
 			cursor: pointer;
+			transition: transform 0.2s ease-in-out;
+			border-radius: 0.5rem;
+    		overflow: hidden;
+			box-shadow: 0 0 15px #4444443c;
+			transition:
+				transform 0.2s ease-in-out,
+				box-shadow 0.2s ease-in-out;
+		}
+		.memory-card:hover {
+			transform: scale(1.1);
+			box-shadow: 0 0 20px #51ff00;
+		}
+		.memory-card.flipped-wrapper {
+			box-shadow: none;
+		}
+		.card-interrogation {
+			position: absolute;
+			font-size: 72px;
 		}
 		.card-inner {
 			position: relative;
@@ -36,7 +123,6 @@
 		}
 		.card-inner.flipped {
 			transform: rotateY(180deg) scale(1.05);
-			animation: bounce 0.3s;
 		}
 		.card-face {
 			position: absolute;
@@ -49,15 +135,75 @@
 			border-radius: 0.5rem;
 			box-shadow: 0 2px 5px rgba(0,0,0,0.3);
 			backface-visibility: hidden;
+			overflow: hidden;
+		}
+		.card-face img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
 		}
 		.card-front {
-			background: #0d6efd;
+			background: #666666;
 			color: #fff;
 		}
-		.card-back {
+		.card-front img {
+			filter: grayscale(100%) opacity(50%);
+		}
+		.card-turned {
 			background: #fff;
 			transform: rotateY(180deg);
 		}
+
+		.victory-overlay {
+			position: fixed;
+			inset:0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: rgba(0,0,0,.7);
+			backdrop-filter: blur(3px);
+			z-index: 10;
+		}
+		.victory-card {
+			padding: 2rem 3rem;
+			background: rgba(8,8,8,.9);
+			border: 1px solid var(--primary);
+			border-radius: 1rem;
+			text-align: center;
+			box-shadow: 0 0 25px rgba(84,216,255,.4);
+			animation: pop .6s ease-out;
+		}
+		.victory-card h2 {
+			margin: 0 0 1rem;
+			font-family: "Orbitron", sans-serif;
+			font-size: 2rem;
+			color: white;
+			text-shadow: 0 0 6px rgba(84,216,255,.7);
+		}
+		.orbitron-text {
+			font-family: "Orbitron", sans-serif;
+		}
+		.play-btn {
+			font-family: "Orbitron", sans-serif;
+			letter-spacing: .05em;
+			padding: .5rem 1.5rem;
+			font-size: 1rem;
+			color: #0a0a0a;
+			background: var(--primary);
+			border: none;
+			border-radius: 9999px;
+			box-shadow: 0 0 10px rgba(84,216,255,.7);
+			transition: transform .2s;
+		}
+		.play-btn:hover {
+			transform:scale(1.05);
+		}
+
+		@keyframes pop{
+			0%{transform:scale(.6);opacity:0;}
+			100%{transform:scale(1);opacity:1;}
+		}
+
 		@keyframes bounce {
 			0%, 100% { transform: rotateY(180deg) scale(1); }
 			50%     { transform: rotateY(180deg) scale(1.1); }
@@ -70,12 +216,64 @@
 	<script type="text/babel">
 		const { useState, useEffect } = React;
 
-		function Card({ value, isFlipped, isMatched, onClick }) {
+		function Header({ moves, memorizing }) {
 			return (
-			<div className="memory-card" onClick={onClick}>
+				<div className="header">
+					<h1 className="m-0">Halo: Memoria</h1>
+					{memorizing && <p>Memoriza las cartas...</p>}
+					{!memorizing && <p>Movimientos: {moves}</p>}
+				</div>
+			);	
+		}
+
+		function StartBanner({ onStart }){
+			return(
+				<div className="victory-overlay">
+					<div className="victory-card">
+						<h2>Halo: Memoria</h2>
+						<div className="text-light orbitron-text">
+							<p>1. Memoriza en 3 segundos</p>
+							<p>2. Encuentra y empareja</p>
+						</div>
+						<button className="play-btn" onClick={onStart}>Comenzar</button>
+					</div>
+				</div>
+			);
+		}
+
+		function Table({ children }) {
+			return (
+				<div className="table-container">
+					<div className="table-content">{children}</div>
+				</div>
+			);
+		}
+
+		function VictoryBanner({ moves, onPlayAgain }){
+			return(
+				<div className="victory-overlay">
+					<div className="victory-card">
+						<h2>¡Victoria!</h2>
+						<p className="text-light mb-4 orbitron-text">Movimientos: {moves}</p>
+						<button className="play-btn" onClick={onPlayAgain}>Jugar de nuevo</button>
+					</div>
+				</div>
+			);
+		}
+
+		function Card({ value, isFlipped, isMatched, onClick }) {
+			const wrapperClasses = `memory-card${(isFlipped||isMatched) ? " flipped-wrapper" : ""}`;
+
+			return (
+			<div className={wrapperClasses} onClick={onClick}>
 				<div className={"card-inner" + ((isFlipped || isMatched) ? " flipped" : "")}>
-					<div className="card-face card-front">?</div>
-					<div className="card-face card-back">{value}</div>
+					<div className="card-face card-front">
+						<img src="https://c4.wallpaperflare.com/wallpaper/667/893/100/halo-halo-infinite-wallpaper-preview.jpg" alt="" />
+						<div className="card-interrogation orbitron-text">?</div>
+					</div>
+					<div className="card-face card-turned">
+						<img src={value} alt=""></img>
+					</div>
 				</div>
 			</div>
 			);
@@ -86,8 +284,9 @@
 			const colsNumber = Math.max(2, cols);
 			const style = {
 				display: "grid",
+				justifyContent: "center",
 				gridTemplateRows: `repeat(${rowsNumber}, 1fr)`,
-				gridTemplateColumns: `repeat(${colsNumber}, 1fr)`
+				gridTemplateColumns: `repeat(${colsNumber}, 0fr)`
 			};
 
 			return <div className="grid-container" style={style}>{children}</div>;
@@ -95,26 +294,41 @@
 
 		function App() {
 			const rows = 4, cols = 4;
-			const uniqueVals = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼'];
+			const uniqueVals = [ 
+				'https://cdnb.artstation.com/p/assets/images/images/019/169/535/large/kolby-jukes-94915599-f406-4d23-beb1-55e896b10a52.jpg?1562312622',
+				'https://i.pinimg.com/736x/82/72/34/8272341377f4c08d01ca5ab7104ef4dd.jpg',
+				'https://i.pinimg.com/736x/d5/de/fa/d5defafd8e090b8721cd5d44d89cb846.jpg',
+				'https://wallpapers.com/images/hd/noble-six-1920-x-2880-wallpaper-jhj9pnh50aenobzm.jpg',
+				'https://i.pinimg.com/originals/bb/a0/96/bba096f4af61443ca9e1b4f0d57d95a8.jpg',
+				'https://i.pinimg.com/736x/4a/f2/31/4af231f7589f496adc6a41597a3ddf0f.jpg',
+				'https://pbs.twimg.com/media/GW2UHJnWoAA_1PI.jpg',
+				'https://pbs.twimg.com/media/CBoRTjNUAAAy_L-.jpg:large'
+			];
 
 			const [cards, setCards]		= useState([]);
-			const [flipped, setFlipped] = useState([]);
-			const [matched, setMatched] = useState([]);
+			const [cardsFlipped, setCardsFlipped] = useState([]);
+			const [cardsMatched, setCardsMatched] = useState([]);
 			const [moves, setMoves]		= useState(0);
 			const [busy, setBusy]		= useState(false);
 			const [showAll, setShowAll] = useState(true);
+			const [ready,setReady]		= useState(false);
+			const [memorizing, setMemorizing] = useState(false);
 
 			useEffect(() => {
-				startGame();
-			}, []);
+				if (ready) {
+					startGame();
+				} 
+			}, [ready]);
 
-			const handleClick = id => {
-				if (busy || flipped.includes(id) || matched.includes(id) || showAll) {
+			const handleStart = () => setReady(true);
+
+			const cardClick = id => {
+				if (busy || cardsFlipped.includes(id) || cardsMatched.includes(id) || showAll) {
 					return;
 				} 
 
-				const newFlip = [...flipped, id];
-				setFlipped(newFlip);
+				const newFlip = [...cardsFlipped, id];
+				setCardsFlipped(newFlip);
 
 				if (newFlip.length === 2) {
 					setBusy(true);
@@ -122,7 +336,7 @@
 					const [i,j] = newFlip;
 
 					if (cards[i] === cards[j]) {
-						setMatched(matched => [...matched, i, j]);
+						setCardsMatched(cardsMatched => [...cardsMatched, i, j]);
 						resetTurn();
 					} else {
 						setTimeout(resetTurn, 1000);
@@ -133,50 +347,56 @@
 			const startGame = () => {
 				const deck = [...uniqueVals, ...uniqueVals].sort(() => Math.random()-0.5);
 				setCards(deck);
-				setTimeout(() => setShowAll(false), 1500);
+				setMemorizing(true);
+				setTimeout(() => {
+					setShowAll(false)
+					setMemorizing(false);
+				}, 3000);
 			}
 
 			const resetTurn = () => {
-				setFlipped([]);
+				setCardsFlipped([]);
 				setBusy(false);
 			};
 
 			const resetGame = () => {
-				setMatched([]);
+				setCardsMatched([]);
 				setMoves(0);
 				setShowAll(true);
 
 				startGame();
 			};
 
-			const won = matched.length === cards.length;
+			const won = ready && cardsMatched.length === cards.length;
 
 			return (
-			<div className="container text-center mt-4">
-				<h1>Memoria</h1>
-				<p>Movimientos: {moves}</p>
+				<div>
+					{!ready && <StartBanner onStart={handleStart}/>}
 
-				{won &&
-					<div className="alert alert-success">
-						¡Ganaste! 
-						<button className="btn btn-sm btn-primary ms-2" onClick={resetGame}>
-						Jugar de nuevo
-						</button>
-					</div>
-				}
-
-				<Grid rows={rows} cols={cols}>
-					{cards.map((value, index) =>
-						<Card
-							key={index}
-							value={value}
-							isFlipped={showAll || flipped.includes(index)}
-							isMatched={matched.includes(index)}
-							onClick={() => handleClick(index)}
-						/>
-					)}
-				</Grid>
-			</div>
+					{
+						ready && (
+							<div>
+								<Header moves={moves} memorizing={memorizing}/>
+								<Table>
+									<div className="w-100 text-center">
+										{won && <VictoryBanner moves={moves} onPlayAgain={resetGame}/>}
+										<Grid rows={rows} cols={cols}>
+											{cards.map((value,index)=>
+												<Card
+													key={index}
+													value={value}
+													isFlipped={showAll||cardsFlipped.includes(index)}
+													isMatched={cardsMatched.includes(index)}
+													onClick={()=>cardClick(index)}
+												/>
+											)}
+										</Grid>
+									</div>
+								</Table>
+							</div>
+						)
+					}
+				</div>
 			);
 		}
 
